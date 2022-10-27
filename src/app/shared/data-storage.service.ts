@@ -13,7 +13,6 @@ export class DataStorageService {
   // BASE_URL_FIREBASE = `https://recipebook-47082-default-rtdb.europe-west1.firebasedatabase.app/recipes.json`; // recipe-book
   BASE_URL_FIREBASE =`https://recipes-book-ngrx-default-rtdb.europe-west1.firebasedatabase.app/recipes.json`; // recipe-book-ngrx
 
-
   
   constructor(private http : HttpClient, private recipeService : RecipeService, private authService:AuthService){
   }

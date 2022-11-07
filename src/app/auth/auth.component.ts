@@ -1,52 +1,52 @@
-import { Component } from "@angular/core";
+import { Component,OnDestroy,OnInit} from "@angular/core";
 import { NgForm } from "@angular/forms";
-import { Router } from "@angular/router";
-import { Observable } from "rxjs";
-import { AuthResponseData, AuthService } from "./auth.service";
-
+import * as fromApp from '../store/app.reducers';
+import * as AuthActions from './store/auth.actions';
+import { Store } from "@ngrx/store";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: 'app-auth',
   templateUrl:'./auth.component.html'
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit, OnDestroy {
   isLoginMode = true;
   isLoading = false;
   error: string;
-  constructor(private authService: AuthService, private router: Router){}
+  storeSub:Subscription
+  constructor(private store : Store<fromApp.AppState>){}
+
+  ngOnInit(): void {
+    this.storeSub = this.store.select('auth').subscribe(authState => {
+      this.isLoading= authState.loading,
+      this.error= authState.authError
+    })
+  }
 
   onSwitchMode(){
    this.isLoginMode = !this.isLoginMode;
   }
 
   onAuthSubmit(form: NgForm){
-    let authObs : Observable<AuthResponseData>;
+  
     if(!form.valid){
       return;
     }
     this.isLoading = true;
     if(this.isLoginMode){
-      authObs =this.authService.login(form.value.email, form.value.password);
+      this.store.dispatch(new AuthActions.LoginStart({email: form.value.email, password: form.value.password}));
     }else{
-      authObs = this.authService.signup(form.value.email, form.value.password);
+      this.store.dispatch(new AuthActions.SignupStart({email: form.value.email, password: form.value.password}))
     }
-    authObs.subscribe(
-      {
-        next: resData => {  
-          console.log(resData),
-          this.isLoading = false;
-          this.router.navigate(['/recipes']);
-        },
-        error: errorMessage => {
-         this.error = errorMessage;
-          this.isLoading = false;
-        }
-      }
-    );
     form.reset();
   }
 
   onHAndleError(){
-    this.error=null;
+   this.store.dispatch(new AuthActions.ClearError());
+  }
+  ngOnDestroy(): void {
+    if(this.storeSub){
+      this.storeSub.unsubscribe();
+    }
   }
 }

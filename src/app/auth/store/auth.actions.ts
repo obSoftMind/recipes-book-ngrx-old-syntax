@@ -1,5 +1,6 @@
 import { Action } from "@ngrx/store";
 
+
 export const LOGIN_START= '[Auth] Login Start';
 export const AUTHENTICATE_SUCCESS = '[Auth] Authenticate Success';
 export const AUTHENTICATE_FAIL = '[Auth] Authenticate Fail';
@@ -10,7 +11,7 @@ export const AUTO_LOGIN='[Auth] Auto Login'
 
 export class AuthenticateSuccess implements Action{
   readonly type = AUTHENTICATE_SUCCESS
-  constructor(public payload : {email : string, userId: string, token: string,expirationDate : Date}) {}
+  constructor(public payload : {email : string, userId: string, token: string,expirationDate : Date; redirect: boolean}) {}
 }
 
 export class AuthenticateFail implements Action{

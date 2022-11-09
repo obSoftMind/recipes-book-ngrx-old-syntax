@@ -23,7 +23,7 @@ const handleAuthentication = (email: string, userId: string, token: string, expi
   let expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
   const user = new User(email, userId,token,expirationDate);
   localStorage.setItem('userData', JSON.stringify(user));
-  return new AuthActions.AuthenticateSuccess( { email, userId, token, expirationDate} )
+  return new AuthActions.AuthenticateSuccess( { email, userId, token, expirationDate, redirect: true} )
 }
 
 const handleError = (errorRes) => {
@@ -79,11 +79,11 @@ export class AuthEffects {
         .pipe(
           tap( (resData) => this.authService.setLogoutTimer(+resData.expiresIn  * 1000)),
           map( (resData: AuthResponseData) => {
-            return handleAuthentication(resData.email, resData.localId, resData.idToken, +resData.expiresIn * 1000)
+            return handleAuthentication(resData.email, resData.localId, resData.idToken, +resData.expiresIn)
            }
           ),
           catchError(errorRes => {
-            return handleError(errorRes)
+            return handleError(errorRes);
           })
         )
       })
@@ -93,7 +93,11 @@ export class AuthEffects {
   authRedirect$ = createEffect(
     () => this.actions$.pipe(
       ofType(AuthActions.AUTHENTICATE_SUCCESS),
-      tap(() => this.router.navigateByUrl('/'))
+      tap((authSuccessActions: AuthActions.AuthenticateSuccess) => {
+        if(authSuccessActions.payload.redirect){
+          this.router.navigateByUrl('/')
+        }
+      })
     ), {dispatch: false}
   )
   
@@ -124,7 +128,12 @@ export class AuthEffects {
             const expirationDuration =   new Date( userData._tokenExpirationDate).getTime() - new Date().getTime();
             this.authService.setLogoutTimer(expirationDuration);
             return new AuthActions.AuthenticateSuccess(
-              {email:loadedUser.email,userId: loadedUser.id, token: loadedUser.token, expirationDate: new Date( userData._tokenExpirationDate)}
+              {
+                email:loadedUser.email,
+                userId: loadedUser.id, 
+                token: loadedUser.token, 
+                expirationDate: new Date( userData._tokenExpirationDate),
+                redirect : false}
             )
           }
           return { type : 'DUMMY'}

@@ -13,6 +13,7 @@ import * as fromApp from '../app/store/app.reducers';
 import { EffectsModule } from '@ngrx/effects';
 import { AuthEffects } from './auth/store/auth.effects';
 import { environment } from '../environments/environment';
+import { RecipesEffects } from './recipes/store/recipes.effects';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,7 @@ import { environment } from '../environments/environment';
     BrowserModule,
     HttpClientModule,
     StoreModule.forRoot(fromApp.appReducer),
-    EffectsModule.forRoot([AuthEffects]),
+    EffectsModule.forRoot([AuthEffects, RecipesEffects]),
     StoreDevtoolsModule.instrument({ maxAge:25,logOnly:environment.production}),
     StoreRouterConnectingModule.forRoot({stateKey:'router', routerState:RouterState.Minimal}),
     AppRoutingModule,
